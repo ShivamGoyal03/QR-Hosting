@@ -1,5 +1,6 @@
 import png
 import pyqrcode
+from io import BytesIO
 from flask import Flask, render_template, request, send_file
 
 app = Flask(__name__)
@@ -14,9 +15,11 @@ def generate_qr_code():
     filename = request.form["filename"]
 
     qr = pyqrcode.create(url)
-    qr.png(f"static/{filename}.png", scale=8)
+    stream = BytesIO()
+    qr.png(stream, scale=8)
+    stream.seek(0)
 
-    return send_file(f"static/{filename}.png", mimetype="image/png")
+    return send_file(stream, mimetype="image/png", as_attachment=True, download_name=f'{filename}.png')
 
 if __name__ == "__main__":
     app.run(debug=True)
